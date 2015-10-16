@@ -29,6 +29,15 @@ class WebSocketObject implements WebSocketClientInterface {
 
 	public static $paused = false;
 
+	/** @var callable $onWelcomeCallback */
+	private $onWelcomeCallback;
+
+	/** @var callable $onWelcomeCallback */
+	private $onEventCallback;
+
+	/** @var callable $onWelcomeCallback */
+	private $onMessageCallback;
+
 	public function __construct() {
 //		WebSocketObject::$messageFactory = new WebSocketMessageFactory();
 //		WebSocketObject::$requestHandler = new ServerRequestHandler();
@@ -67,6 +76,50 @@ class WebSocketObject implements WebSocketClientInterface {
 			}
 		}
 	}
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function onWelcome(array $data)
+    {
+        if ($this->onWelcomeCallback instanceof Closure) {
+            $closure = $this->onWelcomeCallback;
+            $closure($this, $data);
+        }
+    }
+
+    /**
+     * @param string $topic
+     * @param array $data
+     * @return void
+     */
+    public function onEvent($topic, $data)
+    {
+        if ($this->onEventCallback instanceof Closure) {
+            $closure = $this->onEventCallback;
+            $closure($this, $topic, $data);
+        }
+    }
+	
+	    /**
+     * @param callable $callback
+     * @return self
+     */
+    public function setOnWelcomeCallback(Closure $callback)
+    {   
+        $this->onWelcomeCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @param callable $onEventCallback
+     * @return self
+     */
+    public function setOnEventCallback(Closure $onEventCallback)
+    {
+        $this->onEventCallback = $onEventCallback;
+        return $this;
+    }
 
 	/**
 	 * Wywolywane gdy request pochodzi z serwera

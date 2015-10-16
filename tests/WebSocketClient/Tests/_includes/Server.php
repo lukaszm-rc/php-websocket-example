@@ -53,6 +53,20 @@ class Server implements WampServerInterface
     /**
      * @var callable
      */
+    private $onSubscribeCallback;
+
+    /**
+     * @var callable
+     */
+    private $onUnSubscribeCallback;
+
+    /**
+     * @var callable
+     */
+    private $onPublishCallback;
+    /**
+     * @var callable
+     */
     private $onMessageCallback;
 
     /**
@@ -131,6 +145,32 @@ class Server implements WampServerInterface
 
     /**
      * @param ConnectionInterface $conn
+     * @param Topic|string $topic
+     */
+    public function onSubscribe(ConnectionInterface $conn, $topic)
+    {
+        $this->subscribers[] = $topic;
+
+        $callback = $this->getOnSubscribeCallback();
+        if (null !== $callback) {
+            $callback($conn, $topic);
+        }
+    }
+
+    /**
+     * @param ConnectionInterface $conn
+     * @param Topic|string $topic
+     */
+    public function onUnSubscribe(ConnectionInterface $conn, $topic)
+    {
+        $callback = $this->getOnUnSubscribeCallback();
+        if (null !== $callback) {
+            $callback($conn, $topic);
+        }
+    }
+
+    /**
+     * @param ConnectionInterface $conn
      */
     public function onOpen(ConnectionInterface $conn)
     {
@@ -159,6 +199,21 @@ class Server implements WampServerInterface
     }
 
     /**
+     * @param ConnectionInterface $conn
+     * @param Topic|string $topic
+     * @param string $event
+     * @param array $exclude
+     * @param array $eligible
+     */
+    public function onPublish(ConnectionInterface $conn, $topic, $event, array $exclude, array $eligible)
+    {
+        $callback = $this->getOnPublishCallback();
+        if (null !== $callback) {
+            $callback($conn, $topic, $event);
+        }
+    }
+
+ /**
      * @param ConnectionInterface $conn
      * @param Topic|string $topic
      * @param string $event
@@ -197,6 +252,60 @@ class Server implements WampServerInterface
     public function getOnMessageCallback()
     {
         return $this->onMessageCallback;
+    }
+
+    /**
+     * @param callable $onSubscribeCallback
+     * @return self
+     */
+    public function setOnSubscribeCallback(Closure $onSubscribeCallback)
+    {
+        $this->onSubscribeCallback = $onSubscribeCallback;
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getOnSubscribeCallback()
+    {
+        return $this->onSubscribeCallback;
+    }
+
+    /**
+     * @param callable $onUnSubscribeCallback
+     * @return self
+     */
+    public function setOnUnSubscribeCallback(Closure $onUnSubscribeCallback)
+    {
+        $this->onUnSubscribeCallback = $onUnSubscribeCallback;
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getOnUnSubscribeCallback()
+    {
+        return $this->onUnSubscribeCallback;
+    }
+
+    /**
+     * @param callable $onPublishCallback
+     * @return self
+     */
+    public function setOnPublishCallback(Closure $onPublishCallback)
+    {
+        $this->onPublishCallback = $onPublishCallback;
+        return $this;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getOnPublishCallback()
+    {
+        return $this->onPublishCallback;
     }
 
     /**

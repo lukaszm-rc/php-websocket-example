@@ -8,7 +8,7 @@ use React\EventLoop\StreamSelectLoop;
 use WebSocketClient\Tests\Client;
 use WebSocketClient\Tests\Server;
 
-class MessageTest extends PHPUnit_Framework_TestCase
+class SubscribtionTest extends PHPUnit_Framework_TestCase
 {
     private $host = '127.0.0.1';
     private $port;
@@ -41,12 +41,12 @@ class MessageTest extends PHPUnit_Framework_TestCase
         $this->server->close();
     }
 
-    public function testMessage()
+    public function testSubscription()
     {
         $loop = $this->loop;
 
         $subscribed = null;
-        $this->server->setOnMessageCallback(function (ConnectionInterface $conn, $topic) use (&$subscribed, $loop) {
+        $this->server->setOnSubscribeCallback(function (ConnectionInterface $conn, $topic) use (&$subscribed, $loop) {
             /** @var \Ratchet\Wamp\Topic $topic */
             $subscribed = $topic->getId();
             $loop->stop();
@@ -54,8 +54,8 @@ class MessageTest extends PHPUnit_Framework_TestCase
 
         $client = new Client($loop, $this->host, $this->port, $this->path);
 
-        $client->setOnMessageCallback(function (Client $conn, $data) use (&$response, $loop) {
-            $conn->send('this_is_my_topic');
+        $client->setOnWelcomeCallback(function (Client $conn, $data) use (&$response, $loop) {
+            $conn->subscribe('this_is_my_topic');
         });
 
         $loop->run();
@@ -63,4 +63,29 @@ class MessageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('this_is_my_topic', $subscribed);
     }
 
+    public function testUnSubscription()
+    {
+        $loop = $this->loop;
+
+        $client = new Client($loop, $this->host, $this->port, $this->path);
+
+        $unsubscribed = null;
+        $this->server->setOnUnSubscribeCallback(function (ConnectionInterface $conn, $topic) use (&$unsubscribed, $loop) {
+            /** @var \Ratchet\Wamp\Topic $topic */
+            $unsubscribed = $topic->getId();
+            $loop->stop();
+        });
+
+        $this->server->setOnSubscribeCallback(function (ConnectionInterface $conn, $topic) use ($client) {
+            $client->unsubscribe('this_is_my_new_topic');
+        });
+
+        $client->setOnWelcomeCallback(function (Client $conn, $data) use (&$response, $loop) {
+            $conn->subscribe('this_is_my_new_topic');
+        });
+
+        $loop->run();
+
+        $this->assertEquals('this_is_my_new_topic', $unsubscribed);
+    }
 }

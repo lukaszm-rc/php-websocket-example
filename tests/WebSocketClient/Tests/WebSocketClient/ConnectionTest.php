@@ -47,7 +47,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
         $client = new Client($loop, $this->host, $this->port, $this->path);
 
         $response = null;
-        $client->setOnMessageCallback(function (Client $conn, array $data) use (&$response, $loop) {
+        $client->setOnWelcomeCallback(function (Client $conn, array $data) use (&$response, $loop) {
             $response = $data;
             $loop->stop();
         });
