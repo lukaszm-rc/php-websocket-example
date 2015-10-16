@@ -13,8 +13,6 @@ before_script:
     before_script:
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install
-  - composer self-update
-  - composer install
 
-
-script: phpunit --coverage-text
+script: 
+    - phpunit --coverage-text
