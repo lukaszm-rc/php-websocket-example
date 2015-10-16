@@ -11,6 +11,7 @@ php:
 before_script:
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install
-
+  - composer self-update
+  - composer install --prefer-source --no-interaction --dev
 script: 
     - phpunit 
