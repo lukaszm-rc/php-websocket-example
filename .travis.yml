@@ -13,4 +13,4 @@ before_script:
   - php composer.phar install
 
 script: 
-    - phpunit --coverage-text
+    - phpunit --bootstrap tests/bootstrap.php
