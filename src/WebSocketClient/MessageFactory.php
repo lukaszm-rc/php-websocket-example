@@ -7,7 +7,7 @@ namespace WebSocketClient;
  *
  * @author Lukasz Mazurek <lukasz.mazurek@redcart.pl>
  */
-class WebSocketMessageFactory {
+class MessageFactory {
 
 	const TYPE_ID_WELCOME = 0;
 
@@ -44,7 +44,7 @@ class WebSocketMessageFactory {
 		$this->array = json_decode(($json != null?$json:$this->json), true);
 	}
 
-	public function createRequest($id, $method, $args = null) {
+	public static function createRequest($id, $method, $args = null) {
 		$msg = [
 			'id' => $id,
 			'type' => 'request',
@@ -56,7 +56,7 @@ class WebSocketMessageFactory {
 		return $msg;
 	}
 
-	public function createResponse($status, $data) {
+	public static function createResponse($status, $data) {
 		$msg = [
 			'id' => $data['id'],
 			'type' => 'response',

@@ -5,7 +5,8 @@
  *
  * @author Lukasz Mazurek <lukasz.mazurek@redcart.pl>
  */
-class ServerRequestHandler {
+namespace WebSocketClient;
+class RequestHandler {
 
 	public $db = array ();
 
@@ -25,7 +26,7 @@ class ServerRequestHandler {
 
 	public function add($value) {
 		$name = array_push($this->db, $value);
-		return $name;
+		return ($name-1);
 	}
 
 	public function delete($name) {
