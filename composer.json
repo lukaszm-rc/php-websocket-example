@@ -1,6 +1,7 @@
 {
 	"name": "websocket/websocketclient",
 	"description": "Description of project rc-websockets.",
+                "license": "MIT",
 	"authors": [
 		{
 			"name": "lukaszm",
@@ -9,7 +10,7 @@
 	],
 	"require": {
 		"php": ">=5.4.0",
-                                "websocket/websocket":"*"
+                                "websocket/websocket":"v0.1"
 	},
 	"autoload": {
 		"psr-4": {

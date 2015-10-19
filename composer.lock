@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e9c8b08cdf28017f0beb85db56a0a800",
-    "content-hash": "7a56c2175bf1fac4d0e403a064384c15",
+    "hash": "06be002cf1b0fd25114981b8881f3070",
+    "content-hash": "cecba4a0940c3bc293cddb12f69b981f",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -184,12 +184,48 @@
                 "stream"
             ],
             "time": "2015-10-07 18:32:58"
+        },
+        {
+            "name": "websocket/websocket",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lukaszm-rc/WebSocket.git",
+                "reference": "a8487868a7bda9324d4e6e86441efd405e2c26f6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lukaszm-rc/WebSocket/zipball/a8487868a7bda9324d4e6e86441efd405e2c26f6",
+                "reference": "a8487868a7bda9324d4e6e86441efd405e2c26f6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "react/socket": "0.4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "WebSocket\\": "src/WebSocket/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Lukasz Mazurek",
+                    "email": "lukasz.mazurek@boo.pl"
+                }
+            ],
+            "description": "WebSocket",
+            "time": "2015-10-19 23:08:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "websocket/websocket": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
