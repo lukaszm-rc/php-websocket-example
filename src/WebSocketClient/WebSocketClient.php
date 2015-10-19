@@ -2,307 +2,173 @@
 
 namespace WebSocketClient;
 
-use React\EventLoop\LoopInterface;
-use React\Socket\Connection;
-use WebSocketClient\Exception\ConnectionException;
+use Closure;
+use WebSocket\Client\WebSocketClientInterface;
+use WebSocket\Client\WebSocketConnection;
+use React\EventLoop\StreamSelectLoop;
+
+define('DEV_MODE', true);
+define("LOOP_TIME", 1);
 
 /**
- * Oparty na eventLoop z ReactPHP klient WebSocket.
+ * Implementacja zdarzen klienta.
  *
  * @author Lukasz Mazurek <lukasz.mazurek@redcart.pl>
  */
-class WebSocketClient {
+class WebSocketClient implements WebSocketClientInterface {
 
-    const VERSION = '0.1.0';
-    const TOKEN_LENGHT = 16;
+    public $client;
+    public static $iResponses = 0;
+    public static $iRequests = 0;
+    public static $paused = false;
 
-    /** @var LoopInterface $loop */
-    private $loop;
+    /** @var callable $onConnectCallback */
+    private $onConnectCallback;
 
-    /** @var WebSocketClientInterface $client */
-    private $client;
+    /** @var callable $onConnectCallback */
+    private $onMessageCallback;
 
-    /** @var Connection $socket */
-    private $socket;
-    private $key;
-    private $host;
-    private $port;
-    private $origin;
-    private $path;
-    private $connected = false;
-    private $callbacks = array();
-
-    /**
-     * @param WebSocketClientInterface $client
-     * @param LoopInterface $loop
-     * @param string $host
-     * @param int $port
-     * @param string $path
-     * @param null|string $origin
-     */
-    public function __construct(WebSocketClientInterface $client, LoopInterface $loop, $host = '127.0.0.1', $port = 8080, $path = '/', $origin = null) {
-        $this->setLoop($loop);
-        $this->setHost($host);
-        $this->setPort($port);
-        $this->setPath($path);
-        $this->setClient($client);
-        $this->setOrigin($origin);
-        $this->setKey($this->generateToken(self::TOKEN_LENGHT));
-        $this->connect();
-        $client->setClient($this);
-    }
-
-    function __destruct() {
-        $this->disconnect();
+    public function __construct(StreamSelectLoop $loop, $host, $port, $path) {
+        $this->setHost($host)
+                ->setPort($port)
+                ->setPath($path);
+        $this->setSocket(new WebSocketConnection($this, $loop, $this->getHost(), $this->getPort(), $this->getPath()));
     }
 
     /**
-     * Connect client to server
-     *
-     * @throws ConnectionException
-     * @return $this
+     * Wywolywane zaraz po nawiazaniu polaczenia
+     * @todo 
+     * @param array $data
      */
-    public function connect() {
-        $root = $this;
-        $client = @stream_socket_client("tcp://{$this->getHost()}:{$this->getPort()}");
-        if (!$client) {
-            throw new ConnectionException;
+    public function onConnect() {
+        if (DEV_MODE) {
+            print_r(["event" => "onConnect"]);
         }
-        $this->setSocket(new Connection($client, $this->getLoop()));
-        $this->getSocket()->on('data', function ($data) use ($root) {
-            $data = $root->parseIncomingRaw($data);
-            $root->parseData($data);
-        });
-        $this->getSocket()->write($this->createHeader());
+        if ($this->onConnectCallback instanceof Closure) {
+            $closure = $this->onConnectCallback;
+            $closure($this);
+        }
+    }
 
+    public function onMessage($data) {
+        if ($this->onMessageCallback instanceof Closure) {
+            $closure = $this->onMessageCallback;
+            $closure($this, $data);
+        } else {
+            if (isset($data['type'])) {
+                switch ($data['type']) {
+                    case 'request':
+                        $this->onRequest($data);
+                        break;
+                    case 'response':
+                        $this->onResponse($data);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Wywolywane gdy request pochodzi z serwera
+     * @param type $data
+     */
+    public function onRequest($data) {
+        $data = (array) $data;
+        if (DEV_MODE) {
+            print_r(["event" => "onRequest", "data" => $data]);
+        }
+        if (isset($data['request']['method'])) {
+            if (method_exists(WebSocketClient::$requestHandler, $data['request']['method'])) {
+                $return = call_user_func_array([WebSocketClient::$requestHandler, $data['request']['method']], [$data['request']['args']]);
+                $this->send(MessageFactory::createResponse('ok', ['id' => $data['id'], 'data' => $return]));
+                return true;
+            }
+        }
+        $this->send(MessageFactory::createResponse('error', ['id' => $data['id'], 'data' => 'No method found']));
+        return false;
+    }
+
+    /**
+     * Wywolywane gdy dostaniemy odpowiedz z serwera
+     * @param type $data
+     */
+    public function onResponse($response) {
+        if (DEV_MODE) {
+            print_r(["event" => "onResponse", "response" => $response]);
+        }
+//        if (isset(WebSocketClient::$callbacks[$response['id']])) {
+//            call_user_func_array(WebSocketClient::$callbacks[$response['id']], $response);
+//        }
+        WebSocketClient::$iResponses++;
+    }
+
+    /**
+     * Statystyki
+     * @return string
+     */
+    public static function onTick() {
+        if (DEV_MODE) {
+            print_r(["event" => "onTick"]);
+        }
+        $ret = "\n" . WebSocketClient::$iResponses . " responses, " . WebSocketClient::$iRequests . " requests in " . LOOP_TIME . " seconds";
+        WebSocketClient::$iResponses = 0;
+        WebSocketClient::$iRequests = 0;
+        return $ret;
+    }
+
+    /**
+     * @param callable $callback
+     * @return self
+     */
+    public function setOnMessageCallback(Closure $callback) {
+        $this->onMessageCallback = $callback;
         return $this;
+    }
+
+    /**
+     * @param callable $callback
+     * @return self
+     */
+    public function setOnConnectCallback(Closure $callback) {
+        $this->onConnectCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Wysylanie requestu
+     * @param type $data
+     * @static
+     */
+    public function send($data, &$callback = null) {
+        WebSocketClient::$iRequests++;
+        if (DEV_MODE) {
+            print_r(["requestSent" => $data, 'callback' => $callback]);
+        }
+        if (isset($callback) && is_callable($callback)) {
+            WebSocketClient::$callbacks[$data['id']] &= $callback;
+            $result = $this->client->send($data);
+//$result =$this->client->call($data['id'], $data, $callback);
+        } else {
+            $result = $this->client->send($data);
+        }
+        return $result;
     }
 
     public function disconnect() {
-        $this->connected = false;
-        if ($this->socket instanceof Connection) {
-            $this->socket->close();
-        }
+
+        $result = $this->client->disconnect();
+        return $result;
     }
 
-    /**
-     * @return bool
-     */
-    public function isConnected() {
-        return $this->connected;
-    }
-
-    public function send($data) {
-        $this->sendData($data);
-    }
-
-    /**
-     * @param $procUri
-     * @param array $args
-     * @param callable $callback
-     */
-    public function call($procUri, array $args, callable $callback = null) {
-        $callId = self::generateAlphaNumToken(16);
-        $this->callbacks[$callId] = $callback;
-
-        $data = array(
-            self::TYPE_ID_CALL,
-            $callId,
-            $procUri
-        );
-        $data = array_merge($data, $args);
-        $this->sendData($data);
-    }
-
-    /**
-     * @param $data
-     * @param $header
-     */
-    private function receiveData($data, $header) {
-        if (!$this->isConnected()) {
-            $this->disconnect();
-            return;
-        }
-		$this->getClient()->onMessage($data);
-    }
-
-    /**
-     * @param $data
-     * @param string $type
-     * @param bool $masked
-     */
-    private function sendData($data, $type = 'text', $masked = true) {
-        if (!$this->isConnected()) {
-            $this->disconnect();
-            return;
-        }
-		if(is_array($data)) {
-			$data  = json_encode($data);
-		}
-        $this->getSocket()->write($this->hybi10Encode($data));
-    }
-
-    /**
-     * Parse received data
-     *
-     * @param $response
-     */
-    private function parseData($response) {
-        if (!$this->connected && isset($response['Sec-Websocket-Accept'])) {
-            if (base64_encode(pack('H*', sha1($this->key . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'))) === $response['Sec-Websocket-Accept']) {
-				$this->getClient()->onConnect();
-                $this->connected = true;
-            }
-        }
-
-        if ($this->connected && !empty($response['content'])) {
-            $content = trim($response['content']);
-            if (preg_match('/(\{.*\})/', $content, $match)) {
-                $content = json_decode($match[1], true);
-                if (is_array($content)) {
-                    unset($response['status']);
-                    unset($response['content']);
-                    $this->receiveData($content, $response);
-                }
-            }
-        }
-    }
-
-    /**
-     * Create header for websocket client
-     *
-     * @return string
-     */
-    private function createHeader() {
-        $host = $this->getHost();
-        if ($host === '127.0.0.1' || $host === '0.0.0.0') {
-            $host = 'localhost';
-        }
-
-        $origin = $this->getOrigin() ? $this->getOrigin() : "null";
-
-        return
-                "GET {$this->getPath()} HTTP/1.1" . "\r\n" .
-                "Origin: {$origin}" . "\r\n" .
-                "Host: {$host}:{$this->getPort()}" . "\r\n" .
-                "Sec-WebSocket-Key: {$this->getKey()}" . "\r\n" .
-                "User-Agent: PHPWebSocketClient/" . self::VERSION . "\r\n" .
-                "Upgrade: websocket" . "\r\n" .
-                "Connection: Upgrade" . "\r\n" .
-                "Sec-WebSocket-Protocol: wamp" . "\r\n" .
-                "Sec-WebSocket-Version: 13" . "\r\n" . "\r\n";
-    }
-
-    /**
-     * Parse raw incoming data
-     *
-     * @param $header
-     * @return array
-     */
-    private function parseIncomingRaw($header) {
-        $retval = array();
-        $content = "";
-        $fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
-        foreach ($fields as $field) {
-            if (preg_match('/([^:]+): (.+)/m', $field, $match)) {
-                $match[1] = preg_replace_callback('/(?<=^|[\x09\x20\x2D])./', function ($matches) {
-                    return strtoupper($matches[0]);
-                }, strtolower(trim($match[1])));
-                if (isset($retval[$match[1]])) {
-                    $retval[$match[1]] = array($retval[$match[1]], $match[2]);
-                } else {
-                    $retval[$match[1]] = trim($match[2]);
-                }
-            } else if (preg_match('!HTTP/1\.\d (\d)* .!', $field)) {
-                $retval["status"] = $field;
-            } else {
-                $content .= $field . "\r\n";
-            }
-        }
-        $retval['content'] = $content;
-
-        return $retval;
-    }
-
-    /**
-     * Generate token
-     *
-     * @param int $length
-     * @return string
-     */
-    private function generateToken($length) {
-        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"§$%&/()=[]{}';
-
-        $useChars = array();
-        // select some random chars:
-        for ($i = 0; $i < $length; $i++) {
-            $useChars[] = $characters[mt_rand(0, strlen($characters) - 1)];
-        }
-        // Add numbers
-        array_push($useChars, rand(0, 9), rand(0, 9), rand(0, 9));
-        shuffle($useChars);
-        $randomString = trim(implode('', $useChars));
-        $randomString = substr($randomString, 0, self::TOKEN_LENGHT);
-
-        return base64_encode($randomString);
-    }
-
-    /**
-     * Generate token
-     *
-     * @param int $length
-     * @return string
-     */
-    public function generateAlphaNumToken($length) {
-        $characters = str_split('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
-
-        srand((float) microtime() * 1000000);
-
-        $token = '';
-
-        do {
-            shuffle($characters);
-            $token .= $characters[mt_rand(0, (count($characters) - 1))];
-        } while (strlen($token) < $length);
-
-        return $token;
-    }
-
-    /**
-     * @param int $port
-     * @return $this
-     */
-    public function setPort($port) {
-        $this->port = (int) $port;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPort() {
-        return $this->port;
-    }
-
-    /**
-     * @param Connection $socket
-     * @return $this
-     */
-    public function setSocket(Connection $socket) {
-        $this->socket = $socket;
-        return $this;
-    }
-
-    /**
-     * @return Connection
-     */
-    public function getSocket() {
-        return $this->socket;
+    public function setClient(WebSocketConnection $client) {
+        $this->client = $client;
     }
 
     /**
      * @param string $host
-     * @return $this
+     * @return self
      */
     public function setHost($host) {
         $this->host = (string) $host;
@@ -317,45 +183,11 @@ class WebSocketClient {
     }
 
     /**
-     * @param null|string $origin
-     */
-    public function setOrigin($origin) {
-        if (null !== $origin) {
-            $this->origin = (string) $origin;
-        } else {
-            $this->origin = null;
-        }
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getOrigin() {
-        return $this->origin;
-    }
-
-    /**
-     * @param string $key
-     * @return $this
-     */
-    public function setKey($key) {
-        $this->key = (string) $key;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getKey() {
-        return $this->key;
-    }
-
-    /**
      * @param string $path
-     * @return $this
+     * @return self
      */
     public function setPath($path) {
-        $this->path = $path;
+        $this->path = (string) $path;
         return $this;
     }
 
@@ -367,157 +199,35 @@ class WebSocketClient {
     }
 
     /**
-     * @param WebSocketClientInterface $client
-     * @return $this
+     * @param int $port
+     * @return self
      */
-    public function setClient(WebSocketClientInterface $client) {
-        $this->client = $client;
+    public function setPort($port) {
+        $this->port = (int) $port;
         return $this;
     }
 
     /**
-     * @return WebSocketClientInterface
+     * @return int
      */
-    public function getClient() {
-        return $this->client;
+    public function getPort() {
+        return $this->port;
     }
 
     /**
-     * @param LoopInterface $loop
-     * @return $this
+     * @param WebSocketConnection $socket
+     * @return self
      */
-    public function setLoop(LoopInterface $loop) {
-        $this->loop = $loop;
+    public function setSocket(WebSocketConnection $socket) {
+        $this->socket = $socket;
         return $this;
     }
 
     /**
-     * @return LoopInterface
+     * @return WebSocketConnection
      */
-    public function getLoop() {
-        return $this->loop;
-    }
-
-    /**
-     * @param $payload
-     * @param string $type
-     * @param bool $masked
-     * @return bool|string
-     */
-    private function hybi10Encode($payload, $type = 'text', $masked = true) {
-        $frameHead = array();
-        $frame = '';
-        $payloadLength = strlen($payload);
-
-        switch ($type) {
-            case 'text':
-                // first byte indicates FIN, Text-Frame (10000001):
-                $frameHead[0] = 129;
-                break;
-
-            case 'close':
-                // first byte indicates FIN, Close Frame(10001000):
-                $frameHead[0] = 136;
-                break;
-
-            case 'ping':
-                // first byte indicates FIN, Ping frame (10001001):
-                $frameHead[0] = 137;
-                break;
-
-            case 'pong':
-                // first byte indicates FIN, Pong frame (10001010):
-                $frameHead[0] = 138;
-                break;
-        }
-
-        // set mask and payload length (using 1, 3 or 9 bytes)
-        if ($payloadLength > 65535) {
-            $payloadLengthBin = str_split(sprintf('%064b', $payloadLength), 8);
-            $frameHead[1] = ($masked === true) ? 255 : 127;
-            for ($i = 0; $i < 8; $i++) {
-                $frameHead[$i + 2] = bindec($payloadLengthBin[$i]);
-            }
-
-            // most significant bit MUST be 0 (close connection if frame too big)
-            if ($frameHead[2] > 127) {
-                $this->close(1004);
-                return false;
-            }
-        } elseif ($payloadLength > 125) {
-            $payloadLengthBin = str_split(sprintf('%016b', $payloadLength), 8);
-            $frameHead[1] = ($masked === true) ? 254 : 126;
-            $frameHead[2] = bindec($payloadLengthBin[0]);
-            $frameHead[3] = bindec($payloadLengthBin[1]);
-        } else {
-            $frameHead[1] = ($masked === true) ? $payloadLength + 128 : $payloadLength;
-        }
-
-        // convert frame-head to string:
-        foreach (array_keys($frameHead) as $i) {
-            $frameHead[$i] = chr($frameHead[$i]);
-        }
-
-        if ($masked === true) {
-            // generate a random mask:
-            $mask = array();
-            for ($i = 0; $i < 4; $i++) {
-                $mask[$i] = chr(rand(0, 255));
-            }
-
-            $frameHead = array_merge($frameHead, $mask);
-        }
-        $frame = implode('', $frameHead);
-        // append payload to frame:
-        for ($i = 0; $i < $payloadLength; $i++) {
-            $frame .= ($masked === true) ? $payload[$i] ^ $mask[$i % 4] : $payload[$i];
-        }
-
-        return $frame;
-    }
-
-    /**
-     * @param $data
-     * @return null|string
-     */
-    private function hybi10Decode($data) {
-        if (empty($data)) {
-            return null;
-        }
-
-        $bytes = $data;
-        $dataLength = '';
-        $mask = '';
-        $coded_data = '';
-        $decodedData = '';
-        $secondByte = sprintf('%08b', ord($bytes[1]));
-        $masked = ($secondByte[0] == '1') ? true : false;
-        $dataLength = ($masked === true) ? ord($bytes[1]) & 127 : ord($bytes[1]);
-
-        if ($masked === true) {
-            if ($dataLength === 126) {
-                $mask = substr($bytes, 4, 4);
-                $coded_data = substr($bytes, 8);
-            } elseif ($dataLength === 127) {
-                $mask = substr($bytes, 10, 4);
-                $coded_data = substr($bytes, 14);
-            } else {
-                $mask = substr($bytes, 2, 4);
-                $coded_data = substr($bytes, 6);
-            }
-            for ($i = 0; $i < strlen($coded_data); $i++) {
-                $decodedData .= $coded_data[$i] ^ $mask[$i % 4];
-            }
-        } else {
-            if ($dataLength === 126) {
-                $decodedData = substr($bytes, 4);
-            } elseif ($dataLength === 127) {
-                $decodedData = substr($bytes, 10);
-            } else {
-                $decodedData = substr($bytes, 2);
-            }
-        }
-        return $decodedData;
+    public function getSocket() {
+        return $this->socket;
     }
 
 }
