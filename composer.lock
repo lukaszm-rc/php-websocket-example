@@ -4,8 +4,13 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "hash": "06be002cf1b0fd25114981b8881f3070",
     "content-hash": "cecba4a0940c3bc293cddb12f69b981f",
+=======
+    "hash": "e9c8b08cdf28017f0beb85db56a0a800",
+    "content-hash": "7a56c2175bf1fac4d0e403a064384c15",
+>>>>>>> dev
     "packages": [
         {
             "name": "evenement/evenement",
@@ -184,6 +189,7 @@
                 "stream"
             ],
             "time": "2015-10-07 18:32:58"
+<<<<<<< HEAD
         },
         {
             "name": "websocket/websocket",
@@ -218,14 +224,20 @@
             ],
             "description": "WebSocket",
             "time": "2015-10-19 23:08:00"
+=======
+>>>>>>> dev
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
+<<<<<<< HEAD
     "stability-flags": {
         "websocket/websocket": 20
     },
+=======
+    "stability-flags": [],
+>>>>>>> dev
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
