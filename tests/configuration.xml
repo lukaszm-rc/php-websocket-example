@@ -6,12 +6,18 @@ and open the template in the editor.
 -->
 
 <!-- see http://www.phpunit.de/wiki/Documentation -->
-<!--phpunit bootstrap="bootstrap.php"
+<!--phpunit
+		 bootstrap="bootstrap.php"
 		 colors="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-		 stopOnFailure="false">
+		 stopOnError="false"
+		 stopOnFailure="false"
+		 stopOnIncomplete="false"
+		 stopOnSkipped="false"
+		 stopOnRisky="false"
+>
 </phpunit-->
 
 <phpunit colors="true" />
