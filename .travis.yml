@@ -7,8 +7,7 @@ php:
   - hhvm
 
 before_script:
-  - wget http://getcomposer.org/composer.phar
   - composer require "phpunit/phpunit" "4.8.*"
-  - composer install --prefer-source --no-interaction --dev
+  - composer install
 script: 
-    - phpunit 
+    - phpunit --configuration phpunit.xml.dist --coverage-text 
