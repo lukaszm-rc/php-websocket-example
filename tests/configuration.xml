@@ -7,11 +7,11 @@ and open the template in the editor.
 
 <!-- see http://www.phpunit.de/wiki/Documentation -->
 <!--phpunit bootstrap="bootstrap.php"
-         colors="false"
+		 colors="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-         stopOnFailure="true">
+		 stopOnFailure="false">
 </phpunit-->
 
-<phpunit colors="false" />
+<phpunit colors="true" />

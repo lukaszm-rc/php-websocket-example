@@ -74,7 +74,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testGetList() {
 		// Remove the following lines when you implement this test.
-		$expected = rand(50, 2000);
+		$expected = rand(5, 10);
 		$this->testAdd($expected);
 		$reply = $this->object->getList();
 		$this->assertEquals(true, is_array($reply));
@@ -87,7 +87,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testDelete() {
 		// Remove the following lines when you implement this test.
-		$items = rand(200, 300);
+		$items = rand(10, 20);
 		$keys = $this->testAdd($items);
 		$now = count($this->object->getList());
 		shuffle($keys);
@@ -103,7 +103,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	 * @todo   Implement testGet().
 	 */
 	public function testGet() {
-		$keys = $this->testAdd(rand(50, 2000));
+		$keys = $this->testAdd(rand(1, 20));
 		foreach ($keys as $value) {
 			$this->assertEquals('item_' . $value, $this->object->get((string) $value), $value . ' != ' . $this->object->get((string) $value));
 		}
