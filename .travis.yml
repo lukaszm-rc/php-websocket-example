@@ -9,7 +9,8 @@ php:
 install:
   - ./install.sh
 before_script:
+  - composer self-update
   - composer require "phpunit/phpunit" "4.8.*"
-  - composer install
+  - composer update
 script: 
     - phpunit --configuration phpunit.xml.dist --coverage-text 
