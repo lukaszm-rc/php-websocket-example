@@ -9,10 +9,10 @@
          syntaxCheck="false">
     <testsuites>
         <testsuite name="WebSocket Client Test Suite">
-            <directory>./tests/WebSocketClient/</directory>
+            <directory>./tests/src/WebSocketClient/</directory>
         </testsuite>
     </testsuites>
     <php>
-        <var name="port" value="8080" />
+        <var name="port" value="8000" />
     </php>
 </phpunit>

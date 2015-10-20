@@ -5,7 +5,9 @@
  *
  * @author Lukasz Mazurek <lukasz.mazurek@redcart.pl>
  */
+
 namespace WebSocketClient;
+
 class RequestHandler {
 
 	public $db = array ();
@@ -13,9 +15,11 @@ class RequestHandler {
 	public function time() {
 		return microtime(true);
 	}
+
 	public function ping() {
 		return "pong";
 	}
+
 	public function pong() {
 		return "ping";
 	}
@@ -26,7 +30,7 @@ class RequestHandler {
 
 	public function add($value) {
 		$name = array_push($this->db, $value);
-		return ($name-1);
+		return ($name - 1);
 	}
 
 	public function delete($name) {

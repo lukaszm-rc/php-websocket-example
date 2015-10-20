@@ -23,7 +23,7 @@
 //        throw new Exception("Unable to load dependencies");
 //    }
 //}
-define('SHELL_CORE_PATH', realpath(__DIR__ . DIRECTORY_SEPARATOR . '..'));
+define('SHELL_CORE_PATH', realpath(__DIR__ . DIRECTORY_SEPARATOR));
 include "../vendor/autoload.php";
 spl_autoload_register(function ($className) {
     $fileName = implode(DIRECTORY_SEPARATOR, [

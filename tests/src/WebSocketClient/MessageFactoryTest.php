@@ -7,162 +7,129 @@ namespace WebSocketClient;
  */
 class MessageFactoryTest extends \PHPUnit_Framework_TestCase {
 
-    /**
-     * @var MessageFactory
-     */
-    protected $object;
-    public $correctValues = [
-        'string' => ['aaaaa', 'bbbbbb', 'cccccc', 'dddd', 'rrr'],
-        'arrays' => [['aa', 'bb'], ['11', '22'], ['cc', '11'], ['aa', 'bb'], ['1', '2']],
-        'integers' => ['111', '2222', '3333', '4444', '555'],
-        'methods' => ['add', 'get', 'set', 'delete', 'getList'],
-        'args' => [
-            ['aa', 'bb'], ['11', '22'], ['cc', '11'], ['aa', 'bb'], ['1', '2']]
-    ];
-    public $wrongValues = [
-        'string' => ['1', 'null', 'false', 'null', 'e'],
-        'arrays' => [ [['a' => 'z', 'b' => 'bb']], ['1', '111'], ['zzzzz'], '1', 'false'],
-        'integers' => ['1.122321312', '-321312', '3.2112a', 'aaaa', '1111'],
-        'methods' => ['c', 'null', 'false', 'eee', '0'],
-        'args' => [
-            'z', false, ['o'], ['aaaaa'], 'eeeeeee']
-    ];
-    public $values;
+	/**
+	 * @var MessageFactory
+	 */
+	protected $object;
 
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
-    protected function setUp() {
-        $this->object = new MessageFactory;
-        $this->values = [$this->wrongValues, $this->correctValues];
-    }
+	public $correctValues = [
+		'string' => ['aaaaa', 'bbbbbb', 'cccccc', 'dddd', 'rrr'],
+		'arrays' => [ ['aa', 'bb'], ['11', '22'], ['cc', '11'], ['aa', 'bb'], ['1', '2']],
+		'integers' => ['111', '2222', '3333', '4444', '555'],
+		'methods' => ['add', 'get', 'set', 'delete', 'getList'],
+		'args' => [
+			['aa', 'bb'], ['11', '22'], ['cc', '11'], ['aa', 'bb'], ['1', '2']]
+	];
 
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown() {
-        
-    }
+	public $wrongValues = [
+		'string' => ['1', 'null', 'false', 'null', 'e'],
+		'arrays' => [ [ ['a' => 'z', 'b' => 'bb']], ['1', '111'], ['zzzzz'], '1', 'false'],
+		'integers' => ['1.122321312', '-321312', '3.2112a', 'aaaa', '1111'],
+		'methods' => ['c', 'null', 'false', 'eee', '0'],
+		'args' => [
+			'z', false, ['o'], ['aaaaa'], 'eeeeeee']
+	];
 
-    /**
-     * @covers WebSocketClient\MessageFactory::createRequest
-     * @todo   Implement testCreateRequest().
-     */
-    public function testCreateRequest() {
-        //correct values
+	public $values;
 
-        $array = MessageFactory::createRequest('11111', 'add', ['aaaa', 'bbbbb']);
-        $this->isValidRequest($array);
+	/**
+	 * Sets up the fixture, for example, opens a network connection.
+	 * This method is called before a test is executed.
+	 */
+	protected function setUp() {
+		$this->object = new MessageFactory;
+		$this->values = [$this->wrongValues, $this->correctValues];
+	}
 
-        for ($i = 0; $i < 1; $i++) {
-            //$isValid = rand(0, 1);
-            $isValid = 0;
+	/**
+	 * Tears down the fixture, for example, closes a network connection.
+	 * This method is called after a test is executed.
+	 */
+	protected function tearDown() {
 
-            try {
-                $array = MessageFactory::createRequest(
-                        $this->values[$isValid]['integers'][rand(0, 4)], $this->values[$isValid]['methods'][rand(0, 4)], $this->values[$isValid]['args'][rand(0, 4)]);
-                $this->isValidRequest($array);
-            } catch (InvalidArgumentException $ex) {
-                
-            }
-        }
-        return;
-    }
+	}
 
-    public function isValidRequest($array) {
-        $this->assertEquals(true, is_array($array), "Not array!");
-        $keys = array_keys($array);
-        foreach ($keys as $key) {
-            switch ($key) {
-                case 'id':
-                    $this->_checkField($array, 'id', 'string');
-                    break;
-                case 'type':
-                    $this->_checkField($array, 'type', 'string');
-                    break;
-                case 'request':
-                    $this->_checkField($array, 'request', 'array');
-                    break;
-                default:
-                    // $this->fail(print_r(['no key' => $key], true));
-                    break;
-            }
-        }
-    }
+	/**
+	 * @covers WebSocketClient\MessageFactory::createRequest
+	 * @todo   Implement testCreateRequest().
+	 */
+	public function testCreateRequest() {
+		//correct values
 
-    protected function _checkField($array, $key, $internalType) {
+		$array = MessageFactory::createRequest('11111', 'add', ['aaaa', 'bbbbb']);
+		$this->isValidRequest($array);
 
-        $this->assertArrayHasKey($key, $array, "No $key !");
-        $this->assertNotEmpty($array[$key], "Key $key is empty");
-        $this->assertInternalType($internalType, $array[$key], "$key is not $internalType");
-    }
+		for ($i = 0; $i < 1; $i++) {
+			//$isValid = rand(0, 1);
+			$isValid = 0;
 
-    /**
-     * @covers WebSocketClient\MessageFactory::createResponse
-     * @todo   Implement testCreateResponse().
-     */
-    public function testCreateResponse() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
+			try {
+				$array = MessageFactory::createRequest(
+								$this->values[$isValid]['integers'][rand(0, 4)], $this->values[$isValid]['methods'][rand(0, 4)], $this->values[$isValid]['args'][rand(0, 4)]);
+				$this->isValidRequest($array);
+			}
+			catch (InvalidArgumentException $ex) {
 
-    /**
-     * @covers WebSocketClient\MessageFactory::__get
-     * @todo   Implement test__get().
-     */
-    public function test__get() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
+			}
+		}
+		return;
+	}
 
-    /**
-     * @covers WebSocketClient\MessageFactory::__set
-     * @todo   Implement test__set().
-     */
-    public function test__set() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
+	public function isValidRequest($array) {
+		$this->assertEquals(true, is_array($array), "Not array!");
+		$keys = array_keys($array);
+		foreach ($keys as $key) {
+			switch ($key) {
+				case 'id':
+					$this->_checkField($array, 'id', 'string');
+					break;
+				case 'type':
+					$this->_checkField($array, 'type', 'string');
+					break;
+				case 'request':
+					$this->_checkField($array, 'request', 'array');
+					break;
+				default:
+					// $this->fail(print_r(['no key' => $key], true));
+					break;
+			}
+		}
+	}
 
-    /**
-     * @covers WebSocketClient\MessageFactory::__isset
-     * @todo   Implement test__isset().
-     */
-    public function test__isset() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
+	protected function _checkField($array, $key, $internalType) {
 
-    /**
-     * @covers WebSocketClient\MessageFactory::getArray
-     * @todo   Implement testGetArray().
-     */
-    public function testGetArray() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
+		$this->assertArrayHasKey($key, $array, "No $key !");
+		$this->assertNotEmpty($array[$key], "Key $key is empty");
+		$this->assertInternalType($internalType, $array[$key], "$key is not $internalType");
+	}
 
-    /**
-     * @covers WebSocketClient\MessageFactory::getJSON
-     * @todo   Implement testGetJSON().
-     */
-    public function testGetJSON() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
+	/**
+	 * @covers WebSocketClient\MessageFactory::createResponse
+	 * @todo   Implement testCreateResponse().
+	 */
+	public function testCreateResponse() {
+		$this->_checkResponse('ok', ['id' => '1', 'data' => "test"]);
+		$this->_checkResponse('error', ['id' => '1', 'data' => "test"]);
+	}
+
+	public function _checkResponse($status, $data) {
+		$message = MessageFactory::createResponse($status, ['id' => '1', 'data' => "test"]);
+		$expected = [
+			'id' => '1',
+			'type' => 'response',
+			'response' => [
+				'time' => microtime(true),
+				'status' => $status,
+			]
+		];
+		foreach ($expected as $key => $value) {
+			if (is_array($value)) {
+				$this->assertEquals($value['status'], $message[$key]['status']);
+			}
+			else {
+				$this->assertEquals($value, $message[$key]);
+			}
+		}
+	}
 
 }

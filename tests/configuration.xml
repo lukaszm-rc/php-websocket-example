@@ -6,7 +6,7 @@ and open the template in the editor.
 -->
 
 <!-- see http://www.phpunit.de/wiki/Documentation -->
-<!--phpunit bootstrap="/path/to/bootstrap.php"
+<!--phpunit bootstrap="bootstrap.php"
          colors="false"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
