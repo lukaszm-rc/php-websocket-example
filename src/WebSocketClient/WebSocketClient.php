@@ -17,8 +17,6 @@ define("LOOP_TIME", 1);
  */
 class WebSocketClient implements WebSocketClientInterface {
 
-	public $client;
-
 	public static $iResponses = 0;
 
 	public static $iRequests = 0;
@@ -36,11 +34,12 @@ class WebSocketClient implements WebSocketClientInterface {
 	private $onMessageCallback;
 
 	public function __construct(StreamSelectLoop $loop, $host, $port, $path) {
-		$this->setHost($host)
-				->setPort($port)
-				->setPath($path);
-		$this->setSocket(new WebSocketConnection($this, $loop, $this->getHost(), $this->getPort(), $this->getPath()));
+		$this->setHost($host);
+		$this->setPort($port);
+		$this->setPath($path);
+		$this->socket = new WebSocketConnection($this, $loop, $this->getHost(), $this->getPort(), $this->getPath());
 		$this->requestHandler = new RequestHandler();
+		//return $this;
 	}
 
 	/**
@@ -109,9 +108,6 @@ class WebSocketClient implements WebSocketClientInterface {
 		if (DEV_MODE) {
 			print_r(["event" => "onResponse", "response" => $response]);
 		}
-//        if (isset(WebSocketClient::$callbacks[$response['id']])) {
-//            call_user_func_array(WebSocketClient::$callbacks[$response['id']], $response);
-//        }
 		WebSocketClient::$iResponses++;
 	}
 
@@ -125,7 +121,6 @@ class WebSocketClient implements WebSocketClientInterface {
 		}
 		$ret = "\n" . WebSocketClient::$iResponses . " responses, " . WebSocketClient::$iRequests . " requests in " . LOOP_TIME . " seconds";
 		WebSocketClient::$iResponses = 0;
-		WebSocketClient::$iRequests = 0;
 		return $ret;
 	}
 
@@ -158,18 +153,14 @@ class WebSocketClient implements WebSocketClientInterface {
 		if (DEV_MODE) {
 			print_r(["requestSent" => $data, 'callback' => $callback]);
 		}
-		$result = $this->client->send($data);
+		$result = $this->socket->send($data);
 		return $result;
 	}
 
 	public function disconnect() {
 
-		$result = $this->client->disconnect();
+		$result = $this->socket->disconnect();
 		return $result;
-	}
-
-	public function setClient(WebSocketConnection $client) {
-		$this->client = $client;
 	}
 
 	/**
@@ -178,7 +169,6 @@ class WebSocketClient implements WebSocketClientInterface {
 	 */
 	public function setHost($host) {
 		$this->host = (string) $host;
-		return $this;
 	}
 
 	/**
@@ -194,7 +184,6 @@ class WebSocketClient implements WebSocketClientInterface {
 	 */
 	public function setPath($path) {
 		$this->path = (string) $path;
-		return $this;
 	}
 
 	/**
@@ -210,7 +199,6 @@ class WebSocketClient implements WebSocketClientInterface {
 	 */
 	public function setPort($port) {
 		$this->port = (int) $port;
-		return $this;
 	}
 
 	/**
@@ -226,7 +214,6 @@ class WebSocketClient implements WebSocketClientInterface {
 	 */
 	public function setSocket(WebSocketConnection $socket) {
 		$this->socket = $socket;
-		return $this;
 	}
 
 	/**

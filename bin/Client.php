@@ -1,8 +1,9 @@
-#!/bin/bash 
+#!/usr/bin/php 
 <?php
 include "../vendor/autoload.php";
 
 use WebSocketClient\WebSocketClient;
+use WebSocketClient\MessageFactory;
 
 /**
  * EventLoop
@@ -13,7 +14,8 @@ $client = new WebSocketClient($loop, '127.0.0.1', '8080', '/');
 /**
  * Podobne do setInterval() z Javascriptu
  */
-$loop->addPeriodicTimer(LOOP_TIME, function () {
-	echo WebSocketClient::onTick();
+$loop->addPeriodicTimer(3, function () use ($client) {
+	WebSocketClient::onTick();
+	$client->send(MessageFactory::createRequest(WebSocketClient::$iRequests, "ping"));
 });
 $loop->run();
