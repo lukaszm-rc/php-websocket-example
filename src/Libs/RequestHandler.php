@@ -1,12 +1,11 @@
 <?php
+namespace WebSocketDemo\Libs;
 
 /**
  * Description of functions
  *
  * @author Lukasz Mazurek <lukasz.mazurek@redcart.pl>
  */
-
-namespace WebSocketClient;
 
 class RequestHandler {
 

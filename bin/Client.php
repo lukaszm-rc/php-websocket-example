@@ -2,20 +2,26 @@
 <?php
 include "../vendor/autoload.php";
 
-use WebSocketClient\WebSocketClient;
-use WebSocketClient\MessageFactory;
+use WebSocketDemo\Libs\MessageFactory;
 
+define("TEST_MODE", true);
 /**
  * EventLoop
  */
 $loop = \React\EventLoop\Factory::create();
-$client = new WebSocketClient($loop, '127.0.0.1', '8080', '/');
+$client = new ClientEvents($loop, '127.0.0.1', '8080', '/');
 
 /**
  * Podobne do setInterval() z Javascriptu
  */
-$loop->addPeriodicTimer(3, function () use ($client) {
-	WebSocketClient::onTick();
-	$client->send(MessageFactory::createRequest(WebSocketClient::$iRequests, "ping"));
+$loop->addPeriodicTimer(LOOP_TIME, function () use ($client) {
+	ClientEvents::onTick();
+	if (TEST_MODE) {
+		$client->send(MessageFactory::createRequest(ClientEvents::$iRequests, "ping"));
+	}
+});
+
+$loop->addPeriodicTimer(60, function () use ($loop) {
+	$loop->stop();
 });
 $loop->run();
