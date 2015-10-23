@@ -5,6 +5,7 @@
  *
  * @author Lukasz Mazurek <lukasz.mazurek@redcart.pl>
  */
+namespace WebSocketDemo;
 use \WebSocket\Server\ServerConnection;
 use \WebSocket\Request\Request;
 use \WebSocket\Request\Response;
@@ -49,9 +50,9 @@ class ServerEvents implements WebSocketServerInterface {
 		$outRPS = $this->outRequests - $this->_outRequests;
 		$outRespPS = $this->outResponses - $this->_outResponses;
 		$str = sprintf(
-				" Received requests: %s (%s per second) \n"
-				. "Received responses: %s  (%s per second) \n"
-				. "Sent requests: %s  (%s per second) \n"
+				  "Received requests: %s (%s per second)\n"
+				. "Received responses: %s  (%s per second)\n"
+				. "Sent requests: %s  (%s per second)\n"
 				. "Sent responses: %s  (%s per second)\n"
 				. "\n", $this->inRequests, ($inRPS / $interval), $this->inResponses, ($inRespPS / $interval), $this->outRequests, ($outRPS / $interval), $this->outResponses, ($outRespPS / $interval));
 		$this->statistics();
