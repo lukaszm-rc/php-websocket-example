@@ -34,8 +34,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testTime() {
 		$time = $this->object->time();
-		$interval = (microtime(true) - $time);
-		$this->assertGreaterThan(0, $interval);
+		$this->assertGreaterThan(0, $time);
 	}
 	/**
 	 * @covers \WebSocketDemo\Libs\RequestHandler::ping
