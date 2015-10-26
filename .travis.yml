@@ -10,10 +10,12 @@ php:
 
 install:
   - ./tests/install.sh
+
 before_script:
   - composer self-update
   - composer require "phpunit/phpunit" "4.8.*"
   - composer update
-  - cd bin && ./Server.php
+  - cd bin && ./Server.php &
+
 script: 
-    - phpunit --configuration phpunit.xml.dist --coverage-text 
+    - phpunit --configuration "tests/configuration.xml" --coverage-text 
