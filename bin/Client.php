@@ -21,7 +21,7 @@ $loop->addPeriodicTimer(LOOP_TIME, function () use ($client) {
 	}
 });
 
-$loop->addPeriodicTimer(60, function () use ($loop) {
-	$loop->stop();
-});
+//$loop->addPeriodicTimer(60, function () use ($loop) {
+//	$loop->stop();
+//});
 $loop->run();

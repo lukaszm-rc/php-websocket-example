@@ -9,7 +9,7 @@
          syntaxCheck="false">
     <testsuites>
         <testsuite name="WebSocket Client Test Suite">
-            <directory>./tests/src/WebSocketClient/</directory>
+            <directory>./tests/src/WebSocketDemo/</directory>
         </testsuite>
     </testsuites>
     <php>
