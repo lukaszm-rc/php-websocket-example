@@ -8,7 +8,7 @@ namespace WebSocketDemo\Libs;
 class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
-	 * @var RequestHandler
+	 * @var \WebSocketDemo\Libs\RequestHandler
 	 */
 	protected $object;
 
@@ -29,7 +29,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::time
+	 * @covers \WebSocketDemo\Libs\RequestHandler::time
 	 * @todo   Implement testTime().
 	 */
 	public function testTime() {
@@ -38,7 +38,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan(0, $interval);
 	}
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::ping
+	 * @covers \WebSocketDemo\Libs\RequestHandler::ping
 	 * @assert pong
 	 */
 	public function testPing() {
@@ -47,7 +47,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('pong', $reply, sprintf("%s != %s", $reply, "pong"));
 	}
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::pong
+	 * @covers \WebSocketDemo\Libs\RequestHandler::pong
 	 */
 	public function testPong() {
 		// Remove the following lines when you implement this test.
@@ -56,7 +56,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::add
+	 * @covers \WebSocketDemo\Libs\RequestHandler::add
 	 * @todo   Implement testAdd().
 	 */
 	public function testAdd($items = 10) {
@@ -69,7 +69,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::getList
+	 * @covers \WebSocketDemo\Libs\RequestHandler::getList
 	 * @todo   Implement testGetList().
 	 */
 	public function testGetList() {
@@ -82,7 +82,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @coversWebSocketDemo\Libs\RequestHandler::delete
+	 * @covers \WebSocketDemo\Libs\RequestHandler::delete
 	 * @todo   Implement testDelete().
 	 */
 	public function testDelete() {
@@ -99,7 +99,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::get
+	 * @covers \WebSocketDemo\Libs\RequestHandler::get
 	 * @todo   Implement testGet().
 	 */
 	public function testGet() {
@@ -111,7 +111,7 @@ class RequestHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\RequestHandler::set
+	 * @covers \WebSocketDemo\Libs\RequestHandler::set
 	 * @todo   Implement testSet().
 	 */
 	public function testSet() {

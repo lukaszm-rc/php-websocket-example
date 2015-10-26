@@ -8,11 +8,6 @@ use WebSocketDemo\Libs\MessageFactory;
  */
 class MessageFactoryTest extends \PHPUnit_Framework_TestCase {
 
-	/**
-	 * @var MessageFactory
-	 */
-	protected $object;
-
 	public $correctValues = [
 		'string' => ['aaaaa', 'bbbbbb', 'cccccc', 'dddd', 'rrr'],
 		'arrays' => [ ['aa', 'bb'], ['11', '22'], ['cc', '11'], ['aa', 'bb'], ['1', '2']],
@@ -50,7 +45,7 @@ class MessageFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\MessageFactory::createRequest
+	 * @covers \WebSocketDemo\Libs\MessageFactory::createRequest
 	 * @todo   Implement testCreateRequest().
 	 */
 	public function testCreateRequest() {
@@ -104,7 +99,7 @@ class MessageFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\Libs\MessageFactory::createResponse
+	 * @covers \WebSocketDemo\Libs\MessageFactory::createResponse
 	 * @todo   Implement testCreateResponse().
 	 */
 	public function testCreateResponse() {
