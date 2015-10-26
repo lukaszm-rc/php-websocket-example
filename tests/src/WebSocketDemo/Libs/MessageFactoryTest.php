@@ -50,7 +50,7 @@ class MessageFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\MessageFactory::createRequest
+	 * @covers WebSocketDemo\Libs\MessageFactory::createRequest
 	 * @todo   Implement testCreateRequest().
 	 */
 	public function testCreateRequest() {
@@ -104,7 +104,7 @@ class MessageFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers WebSocketDemo\MessageFactory::createResponse
+	 * @covers WebSocketDemo\Libs\MessageFactory::createResponse
 	 * @todo   Implement testCreateResponse().
 	 */
 	public function testCreateResponse() {

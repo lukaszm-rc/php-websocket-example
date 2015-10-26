@@ -5,7 +5,6 @@ namespace WebSocketDemo;
 use \Closure;
 use \WebSocket\Client\WebSocketClientInterface;
 use \WebSocket\Client\WebSocketConnection;
-use \React\EventLoop\StreamSelectLoop;
 use \WebSocketDemo\Libs\MessageFactory;
 use \WebSocketDemo\Libs\RequestHandler;
 use \React\EventLoop\LoopInterface;
