@@ -74,7 +74,7 @@ class ClientEventsTest extends \PHPUnit_Framework_TestCase {
 			$client->send(MessageFactory::createRequest("1", "ping"));
 			ClientEvents::onTick();
 		});
-		$loop->addPeriodicTimer(3, function () use (&$client, $loop) {
+		$loop->addPeriodicTimer(10, function () use (&$client, $loop) {
 			$client->disconnect();
 			$loop->stop();
 		});
