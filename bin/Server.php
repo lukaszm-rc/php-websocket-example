@@ -6,7 +6,7 @@ include "../vendor/autoload.php";
  */
 use WebSocket\Server\WebSocketServer;
 
-$events = new ServerEvents();
+$events = new WebSocketDemo\ServerEvents();
 $server = WebSocketServer::Factory($events, "127.0.0.1", "8080");
 
 /**
